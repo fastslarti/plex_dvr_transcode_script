@@ -11,9 +11,9 @@ Will create a temporary `transcode_dvr_recordings.lock` file in the script's dir
 Logs activity in the script's directory in `transcode_dvr_recordings_log.txt`.
 
 ###### Global Variables
-- **$handbrakePath** - String. Set this to the path to your HandBrakeCLI.exe
+- **$handbrakePath** - String. Set this to the path to your HandbrakeCLI.exe
 - **$presetsPath** - String. Set this to the path to your Handbrake `presets.json` file.
 
 ###### Parameters
 - **--delete_source** - Switch. When set source `.ts` files will be deleted after transcoding.
-- **--use_preset** - String. The HandBrake preset to use ex. `--use_preset:"HQ 1080p30 Surround"`. Would suggest setting a valid default.
+- **--use_preset** - String. The Handbrake preset to use ex. `--use_preset:"HQ 1080p30 Surround"`. Would suggest setting a valid default.
