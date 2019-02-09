@@ -32,12 +32,13 @@ Function transcodeFile ($source, $destination, $preset) {
     & $handbrakePath -i $source -o $destination  --preset-import-file $presetsPath -Z $preset
 }
 
+# Log Script Start
+logger "SCRIPT START - TRANSCODER PRESET: $use_preset"
+
 # Lock file ensures one instance only
 If ( !(testLock) ) {
     # Create lock file
     toggleLock
-    # Log Script Start
-    logger "SCRIPT START - TRANSCODER PRESET: $use_preset"
     $fileCntr = 0
     $totalMbSaved = 0
     # Iterates over all .ts files in all sub-directories
@@ -80,6 +81,5 @@ If ( !(testLock) ) {
     # Delete lock file
     toggleLock
 } else {
-    logger "SCRIPT START - TRANSCODER PRESET: $use_preset"
     logger "SCRIPT END - LOCK FILE EXISTS"
 }
