@@ -1,6 +1,6 @@
 param (
     [switch] $delete_source, # If script is run w/--delete_source param, source .ts files will be deleted automatically after transcoding
-    [string] $use_preset = "[Handbrake Preset To Use]" # Example: "HQ 1080p30 Surround"
+    [string] $use_preset = "[Default Handbrake Preset To Use]" # Example: "HQ 1080p30 Surround"
 )
 $lockFile = "$PSScriptRoot\$($MyInvocation.MyCommand)" -replace ".ps1", ".lock"
 $logFile = "$PSScriptRoot\$($MyInvocation.MyCommand)" -replace ".ps1", "_log.txt"
@@ -46,11 +46,11 @@ If ( !(testLock) ) {
         if ( !($_.FullName -like '*grab*') ) {
             # Create destination .mp4 file path
             $newFileName = "$($_.FullName.SubString(0, $_.FullName.length - 3)).mp4"
+            # Create logged filenames
+            $logOldFileName = $_.FullName.split("\\")[-1]
+            $logNewFileName = $newFileName.split("\\")[-1]
             # Verify destination file doesn't already exist
             if ( !(test-path -LiteralPath $newFileName) ) {
-                # Create logged filenames
-                $logOldFileName = $_.FullName.split("\\")[-1]
-                $logNewFileName = $newFileName.split("\\")[-1]
                 $oldFileSize = [math]::Round($_.Length / 1MB)
                 # Log transcode start
                 logger "TRANSCODE START - SOURCE FILE: $logOldFileName - $oldFileSize MB"
@@ -64,8 +64,10 @@ If ( !(testLock) ) {
                 }
                 # Log transcode end
                 logger "TRANSCODE END - DESTINATION FILE: $logNewFileName - $newFileSize MB"
+                $fileCntr++
+            } else {
+                logger "FILE SKIPPED - $logOldFileName - $logNewFileName ALREADY EXISTS"
             }
-            $fileCntr++
         }
     }
     # Log Script End
@@ -77,4 +79,7 @@ If ( !(testLock) ) {
     Logger $finalLogStr
     # Delete lock file
     toggleLock
+} else {
+    logger "SCRIPT START - TRANSCODER PRESET: $use_preset"
+    logger "SCRIPT END - LOCK FILE EXISTS"
 }
