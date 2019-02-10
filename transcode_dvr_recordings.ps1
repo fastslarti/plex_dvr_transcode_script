@@ -72,10 +72,14 @@ If ( !(testLock) ) {
         }
     }
     # Log Script End
-    $finalLogStr = "SCRIPT END - $fileCntr FILES TRANSCODED"
-    # If source files deleted, append space saved to final log string
-    if ( $delete_source ) {
-        $finalLogStr += " - SOURCE FILES DELETED: $totalMbSaved MB Saved"
+    if ( $fileCntr -gt 0 ) {
+        $finalLogStr = "SCRIPT END - $fileCntr FILES TRANSCODED"
+        # If source files deleted, append space saved to final log string
+        if ( $delete_source ) {
+            $finalLogStr += " - SOURCE FILES DELETED: $totalMbSaved MB Saved"
+        }
+    } else {
+        $finalLogStr = "SCRIPT END - NO FILES ELIGIBLE FOR TRANSCODE"
     }
     Logger $finalLogStr
     # Delete lock file
