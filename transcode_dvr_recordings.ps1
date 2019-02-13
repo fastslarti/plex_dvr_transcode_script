@@ -2,8 +2,10 @@ param (
     [switch] $delete_source, # If script is run w/--delete_source param, source .ts files will be deleted automatically after transcoding
     [string] $use_preset = "[Default Handbrake Preset To Use]" # Example: "HQ 1080p30 Surround"
 )
-$lockFile = "$PSScriptRoot\$($MyInvocation.MyCommand)" -replace ".ps1", ".lock"
-$logFile = "$PSScriptRoot\$($MyInvocation.MyCommand)" -replace ".ps1", "_log.txt"
+$filePath = "$PSScriptRoot\$($MyInvocation.MyCommand)"
+$filePathNoEx = $filePath.Remove($filePath.LastIndexOf('.'))
+$lockFile = $filePathNoEx + ".lock"
+$logFile = $filePathNoEx + "_log.txt"
 $handbrakePath = "[Path to HandBrakeCLI.exe]" # Example: "C:\Program Files\HandBrake\HandBrakeCLI.exe"
 $presetsPath = "[Path to Handbrake Preset File]" # Example: "C:\Users\[USERNAME]\AppData\Roaming\HandBrake\presets.json"
 
