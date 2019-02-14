@@ -1,13 +1,14 @@
 param (
     [switch] $delete_source, # If script is run w/--delete_source param, source .ts files will be deleted automatically after transcoding
-    [string] $use_preset = "[Default Handbrake Preset To Use]" # Example: "HQ 1080p30 Surround"
+    [string] $use_preset = "[Default Handbrake Preset To Use]", # Example: "HQ 1080p30 Surround"
+    [string] $videoRoot = "[Root Video Dir]" # Root directory containing video files to transcode. Example: "C:\Users\[USERNAME]\Videos"
 )
-$filePath = "$PSScriptRoot\$($MyInvocation.MyCommand)"
-$filePathNoEx = $filePath.Remove($filePath.LastIndexOf('.'))
-$lockFile = $filePathNoEx + ".lock"
-$logFile = $filePathNoEx + "_log.txt"
+
 $handbrakePath = "[Path to HandBrakeCLI.exe]" # Example: "C:\Program Files\HandBrake\HandBrakeCLI.exe"
 $presetsPath = "[Path to Handbrake Preset File]" # Example: "C:\Users\[USERNAME]\AppData\Roaming\HandBrake\presets.json"
+$fileNameNoEx = "$($MyInvocation.MyCommand)".Remove("$($MyInvocation.MyCommand)".LastIndexOf('.'))
+$lockFile = "$videoRoot\$($fileNameNoEx).lock"
+$logFile = "$videoRoot\$($fileNameNoEx)_log.txt"
 
 # Checks for existence of lock file, returns boolean
 Function testLock() {
@@ -34,35 +35,37 @@ Function transcodeFile ($source, $destination, $preset) {
     & $handbrakePath -i $source -o $destination  --preset-import-file $presetsPath -Z $preset
 }
 
-# Log Script Start
-logger "SCRIPT START - TRANSCODER PRESET: $use_preset"
-
 # Lock file ensures one instance only
 If ( !(testLock) ) {
     # Create lock file
     toggleLock
-    $fileCntr = 0
-    $totalMbSaved = 0
-    # Iterates over all .ts files in all sub-directories
-    Get-ChildItem *.ts -recurse | foreach {
-        # Skip .grab directories
-        if ( !($_.FullName -like '*grab*') ) {
+    # Recursively gathers .ts files in the videoRoot directory to transcode, excludes files in .grab directories
+    $filesToTranscode = Get-ChildItem -Path $videoPath -Include *.ts -Recurse | ? {
+        $_.FullName -inotmatch "\\.grab\\"
+    }
+    # Log Script Start
+    if ( $filesToTranscode.length -gt 0 ) {
+        logger "SCRIPT START - TRANSCODER PRESET: $use_preset - $($filesToTranscode.length) FILES QUEUED"
+        $fileCntr = 0
+        $totalMbSaved = 0
+        foreach ( $file in $filesToTranscode ) {
+            $oldFileName = "$($file.DirectoryName)\$($file.Name)"
             # Create destination .mp4 file path
-            $newFileName = "$($_.FullName.SubString(0, $_.FullName.length - 3)).mp4"
+            $newFileName = "$($oldFileName.Remove($oldFileName.LastIndexOf('.'))).mp4"
             # Create logged filenames
-            $logOldFileName = $_.FullName.split("\\")[-1]
+            $logOldFileName = $oldFileName.split("\\")[-1]
             $logNewFileName = $newFileName.split("\\")[-1]
             # Verify destination file doesn't already exist
             if ( !(test-path -LiteralPath $newFileName) ) {
-                $oldFileSize = [math]::Round($_.Length / 1MB)
+                $oldFileSize = [math]::Round($file.Length / 1MB)
                 # Log transcode start
                 logger "TRANSCODE START - SOURCE FILE: $logOldFileName - $oldFileSize MB"
                 # Run handbrake on current file
-                transcodeFile $_.FullName $newFileName $use_preset
+                transcodeFile $oldFileName $newFileName $use_preset
                 $newFileSize = [math]::Round((Get-Item $newFileName).length / 1MB)
                 # Delete source .ts file
                 if ( $delete_source ) {
-                    Remove-Item -LiteralPath $_.FullName -Force -ErrorAction Stop
+                    Remove-Item -LiteralPath $oldFileName -Force -ErrorAction Stop
                     $totalMbSaved += ($oldFileSize - $newFileSize)
                 }
                 # Log transcode end
@@ -72,20 +75,21 @@ If ( !(testLock) ) {
                 logger "FILE SKIPPED - $logOldFileName - $logNewFileName ALREADY EXISTS"
             }
         }
-    }
-    # Log Script End
-    if ( $fileCntr -gt 0 ) {
-        $finalLogStr = "SCRIPT END - $fileCntr FILES TRANSCODED"
+        # Log Script End
+        $finalLogStr = "SCRIPT END - FILES TRANSCODED: $fileCntr"
+        if ( $fileCntr -lt $filesToTranscode.length ) {
+            $finalLogStr += " - FILES SKIPPED: $($filesToTranscode.length - $fileCntr)"
+        }
         # If source files deleted, append space saved to final log string
         if ( $delete_source ) {
             $finalLogStr += " - SOURCE FILES DELETED: $totalMbSaved MB Saved"
         }
+        logger $finalLogStr
     } else {
-        $finalLogStr = "SCRIPT END - NO FILES ELIGIBLE FOR TRANSCODE"
+        logger "SCRIPT START - SCRIPT END - NO FILES FOUND"
     }
-    Logger $finalLogStr
     # Delete lock file
     toggleLock
 } else {
-    logger "SCRIPT END - LOCK FILE EXISTS"
+    logger "SCRIPT START - SCRIPT END - LOCK FILE EXISTS"
 }
