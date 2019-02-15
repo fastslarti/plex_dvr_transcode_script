@@ -41,7 +41,7 @@ Function transcodeFile ($source, $destination, $preset) {
 If ( !(testLock) ) {
     # Create lock file
     toggleLock
-    # Recursively gathers .ts files in the video_root directory to transcode, excludes files in .grab directories
+    # Recursively gathers files of the types specified in -file_types in the -video_root directory to transcode, excludes files in .grab directories
     $filesToTranscode = Get-ChildItem -Path $video_root -Include $file_types.Split(",") -Recurse | ? {
         $_.FullName -inotmatch "\\.grab\\"
     }
