@@ -1,10 +1,10 @@
 param (
-    [switch] $delete_source, # If script is run w/-delete_source param, source .ts files will be deleted automatically after transcoding
-    [string] $file_types = "*.ts", # Comma seperated list of file types to transcode. Ex: -file_types:"*.ts,*.avi,*.mp4"
-    [string] $handbrake_path = "[Default Path to Handbrake CLI]", # Ex: -handbrake_path:"C:\Program Files\HandBrake\HandBrakeCLI.exe"
-    [string] $presets_path = "[Default Path to Handbrake Presets .json]", # Ex: -presets_path:"C:\Users\[USERNAME]\AppData\Roaming\HandBrake\presets.json"
-    [string] $use_preset = "[Default Handbrake Preset To Use]", # Ex: --use_preset:"HQ 1080p30 Surround"
-    [string] $video_root = "[Default Root Video Dir]" # Root directory containing video files to transcode. Example: -video_root:"C:\Users\[USERNAME]\Videos"
+    [switch] $delete_source,
+    [string] $file_types = "*.ts",
+    [string] $handbrake_path = "[Default Path to Handbrake CLI]",
+    [string] $presets_path = "[Default Path to Handbrake Presets .json]",
+    [string] $use_preset = "[Default Handbrake Preset To Use]",
+    [string] $video_root = "[Default Root Video Dir]"
 )
 
 # Create lock & log file paths in video_root directory
