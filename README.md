@@ -6,9 +6,9 @@ Plex DVR records streams from my HDHomeRun Connect Duo as `MPEG2` encoded `.ts` 
 ## Usage
 Iterates over all `.ts` files in the directory specified by the videoRoot param (or it's default) & all sub-directories and uses [HandBrake CLI](https://handbrake.fr/) to transcode them using the specified preset.
 
-Will create a temporary `transcode_dvr_recordings.lock` file in the script's directory to prevent multiple instances of this script from running in the same directory.
+Will create a temporary `transcode_dvr_recordings.lock` file in the directory specified in **--videoRoot** to prevent multiple instances of this script from running in the same directory.
 
-Logs activity in the script's directory in `transcode_dvr_recordings_log.txt`.
+Logs activity in the directory specified in **--videoRoot** in `transcode_dvr_recordings_log.txt`.
 
 ###### Global Variables
 - **$handbrakePath** - String. Set this to the path to your HandbrakeCLI.exe
