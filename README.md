@@ -4,17 +4,16 @@
 Plex DVR records streams from my HDHomeRun Connect Duo as `MPEG2` encoded `.ts` files. They're unnecessarily HUGE. This script uses [HandBrake CLI](https://handbrake.fr/) to automatically transcode these files and (optionally) delete the originals to save space & bandwidth. It's intended to be run as a scheduled task.
 
 ## Usage
-Iterates over all `.ts` files in the directory specified by the **--videoRoot** param (or it's default) & all sub-directories and uses [HandBrake CLI](https://handbrake.fr/) to transcode them using the specified preset.
+Iterates over all `.ts` files in the `-video_root` directory & all sub-directories and uses [HandBrake CLI](https://handbrake.fr/) to transcode them using the specified preset.
 
-Will create a temporary `transcode_dvr_recordings.lock` file in the directory specified in **--videoRoot** to prevent multiple instances of this script from running in the same directory.
+Will create a temporary `transcode_dvr_recordings.lock` file in the `-video_root` directory to prevent multiple instances of this script from running on the same content.
 
-Logs activity in the directory specified in **--videoRoot** in `transcode_dvr_recordings_log.txt`.
-
-###### Global Variables
-- **$handbrakePath** - String. Set this to the path to your HandbrakeCLI.exe
-- **$presetsPath** - String. Set this to the path to your Handbrake `presets.json` file.
+Logs activity in the `-video_root` directory in `transcode_dvr_recordings_log.txt`.
 
 ###### Parameters
-- **--delete_source** - Switch. When set source `.ts` files will be deleted after transcoding.
-- **--use_preset** - String. The Handbrake preset to use ex. `--use_preset:"HQ 1080p30 Surround"`. Would suggest setting a valid default.
-- **--videoRoot** - String. The directory containing video files to transcode.
+- **-delete_source** - Switch. When set source files will be deleted after transcoding.
+- **-file_types** - String. Comma seperated list of file types to transcode. Ex: `-file_types:"*.ts,*.avi,*.mp4"`.
+- **-handbrake_path** - String. Path to HandBrakeCLI.exe. Ex: `-handbrake_path:"C:\Program Files\HandBrake\HandBrakeCLI.exe"`.
+- **-presets_path** - String. Path to HandBrake presets .json file. Ex: `-presets_path:"C:\Users\[USERNAME]\AppData\Roaming\HandBrake\presets.json"`
+- **-use_preset** - String. The Handbrake preset to use. Ex. `-use_preset:"HQ 1080p30 Surround"`
+- **-video_root** - String. Root directory containing video files to transcode. Ex: `-video_root:"C:\Users\[USERNAME]\Videos"`.

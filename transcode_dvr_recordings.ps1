@@ -1,14 +1,16 @@
 param (
-    [switch] $delete_source, # If script is run w/--delete_source param, source .ts files will be deleted automatically after transcoding
-    [string] $use_preset = "[Default Handbrake Preset To Use]", # Example: "HQ 1080p30 Surround"
-    [string] $videoRoot = "[Root Video Dir]" # Root directory containing video files to transcode. Example: "C:\Users\[USERNAME]\Videos"
+    [switch] $delete_source, # If script is run w/-delete_source param, source .ts files will be deleted automatically after transcoding
+    [string] $file_types = "*.ts", # Comma seperated list of file types to transcode. Ex: -file_types:"*.ts,*.avi,*.mp4"
+    [string] $handbrake_path = "[Default Path to Handbrake CLI]", # Ex: -handbrake_path:"C:\Program Files\HandBrake\HandBrakeCLI.exe"
+    [string] $presets_path = "[Default Path to Handbrake Presets .json]", # Ex: -presets_path:"C:\Users\[USERNAME]\AppData\Roaming\HandBrake\presets.json"
+    [string] $use_preset = "[Default Handbrake Preset To Use]", # Ex: --use_preset:"HQ 1080p30 Surround"
+    [string] $video_root = "[Default Root Video Dir]" # Root directory containing video files to transcode. Example: -video_root:"C:\Users\[USERNAME]\Videos"
 )
 
-$handbrakePath = "[Path to HandBrakeCLI.exe]" # Example: "C:\Program Files\HandBrake\HandBrakeCLI.exe"
-$presetsPath = "[Path to Handbrake Preset File]" # Example: "C:\Users\[USERNAME]\AppData\Roaming\HandBrake\presets.json"
+# Create lock & log file paths in video_root directory
 $fileNameNoEx = "$($MyInvocation.MyCommand)".Remove("$($MyInvocation.MyCommand)".LastIndexOf('.'))
-$lockFile = "$videoRoot\$($fileNameNoEx).lock"
-$logFile = "$videoRoot\$($fileNameNoEx)_log.txt"
+$lockFile = "$video_root\$($fileNameNoEx).lock"
+$logFile = "$video_root\$($fileNameNoEx)_log.txt"
 
 # Checks for existence of lock file, returns boolean
 Function testLock() {
@@ -32,23 +34,24 @@ Function logger ($logStr) {
 
 # Calls HandBrake w/source file path, destination file path, preset file path, and selected preset argument
 Function transcodeFile ($source, $destination, $preset) {
-    & $handbrakePath -i $source -o $destination  --preset-import-file $presetsPath -Z $preset
+    & $handbrake_path -i $source -o $destination  --preset-import-file $presets_path -Z $preset
 }
 
 # Lock file ensures one instance only
 If ( !(testLock) ) {
     # Create lock file
     toggleLock
-    # Recursively gathers .ts files in the videoRoot directory to transcode, excludes files in .grab directories
-    $filesToTranscode = Get-ChildItem -Path $videoPath -Include *.ts -Recurse | ? {
+    # Recursively gathers .ts files in the video_root directory to transcode, excludes files in .grab directories
+    $filesToTranscode = Get-ChildItem -Path $video_root -Include $file_types.Split(",") -Recurse | ? {
         $_.FullName -inotmatch "\\.grab\\"
     }
-    # Log Script Start
     if ( $filesToTranscode.length -gt 0 ) {
+        # Log Script Start
         logger "SCRIPT START - TRANSCODER PRESET: $use_preset - $($filesToTranscode.length) FILES QUEUED"
         $fileCntr = 0
         $totalMbSaved = 0
         foreach ( $file in $filesToTranscode ) {
+            # Create source .ts file path
             $oldFileName = "$($file.DirectoryName)\$($file.Name)"
             # Create destination .mp4 file path
             $newFileName = "$($oldFileName.Remove($oldFileName.LastIndexOf('.'))).mp4"
@@ -57,11 +60,13 @@ If ( !(testLock) ) {
             $logNewFileName = $newFileName.split("\\")[-1]
             # Verify destination file doesn't already exist
             if ( !(test-path -LiteralPath $newFileName) ) {
+                # Calculate size of original file
                 $oldFileSize = [math]::Round($file.Length / 1MB)
                 # Log transcode start
                 logger "TRANSCODE START - SOURCE FILE: $logOldFileName - $oldFileSize MB"
                 # Run handbrake on current file
                 transcodeFile $oldFileName $newFileName $use_preset
+                # Calculate size of destination file
                 $newFileSize = [math]::Round((Get-Item $newFileName).length / 1MB)
                 # Delete source .ts file
                 if ( $delete_source ) {
