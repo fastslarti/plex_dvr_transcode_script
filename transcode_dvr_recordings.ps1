@@ -1,10 +1,11 @@
+# See README.md for parameter definitions
 param (
     [switch] $delete_source,
     [string] $file_types = "*.ts",
-    [string] $handbrake_path = "[Default Path to Handbrake CLI]",
-    [string] $presets_path = "[Default Path to Handbrake Presets .json]",
-    [string] $use_preset = "[Default Handbrake Preset To Use]",
-    [string] $video_root = "[Default Root Video Dir]"
+    [Parameter(Mandatory = $true)][string] $handbrake_path,
+    [Parameter(Mandatory = $true)][string] $presets_path,
+    [Parameter(Mandatory = $true)][string] $use_preset,
+    [Parameter(Mandatory = $true)][string] $video_root
 )
 
 # Create lock & log file paths in video_root directory
