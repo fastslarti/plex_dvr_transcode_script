@@ -56,9 +56,13 @@ if ( $thisPreset ) {
     if ( !(testLock) ) {
         # Create lock file
         toggleLock
-        # Recursively gathers files of the types specified in -file_types in the -video_root directory to transcode, excludes files in .grab directories
+        # Recursively gathers files of the types specified in -file_types in the -video_root directory to transcode, excludes files in .grab directories.
+        # Get-ChildItem returns a System.IO.FileInfo object if only one file is found, or an array of System.IO.FileInfo objects if multiple files are found
         $filesToTranscode = Get-ChildItem -Path $video_root -Include $file_types.Split(",") -Recurse | ? {
             $_.FullName -inotmatch "\\.grab\\"
+        }
+        if ( !($filesToTranscode -is [array]) ) {
+            $filesToTranscode = @($filesToTranscode)
         }
         if ( $filesToTranscode.length -gt 0 ) {
             # Log Script Start
@@ -69,7 +73,7 @@ if ( $thisPreset ) {
                 # Create source .ts file path
                 $oldFileName = "$($file.DirectoryName)\$($file.Name)"
                 # Create destination file path
-                $newFileName = "$($oldFileName.Remove($oldFileName.LastIndexOf('.'))).$($preset.FileFormat)"
+                $newFileName = "$($oldFileName.Remove($oldFileName.LastIndexOf('.'))).$($thisPreset.FileFormat)"
                 # Create logged filenames
                 $logOldFileName = $oldFileName.split("\\")[-1]
                 $logNewFileName = $newFileName.split("\\")[-1]
