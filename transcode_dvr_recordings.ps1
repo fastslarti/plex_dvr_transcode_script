@@ -11,15 +11,15 @@ $fileNameNoEx = "$($MyInvocation.MyCommand)".Remove("$($MyInvocation.MyCommand)"
 $lockFile = "$video_root\$($fileNameNoEx).lock"
 $logFile = "$video_root\$($fileNameNoEx)_log.txt"
 
-Function testLock() {
-    return test-path -LiteralPath $lockFile
+Function isLocked() {
+    return Test-Path -LiteralPath $lockFile
 }
 
 Function toggleLock() {
-    if ( testLock $lockFile ) {
+    if ( isLocked ) {
         Remove-Item -LiteralPath $lockFile -Force -ErrorAction Stop
     } else {
-        new-item $lockFile
+        New-Item $lockFile
     }
 }
 
@@ -45,7 +45,7 @@ Function getPreset() {
 
 $thisPreset = getPreset
 if ( $thisPreset ) {
-    if ( !(testLock) ) {
+    if ( !(isLocked) ) {
         toggleLock
         $filesToTranscode = Get-ChildItem -Path $video_root -Include $file_types.Split(",") -Recurse | ? {
             $_.FullName -inotmatch "\\.grab\\"

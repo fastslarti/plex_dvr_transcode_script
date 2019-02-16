@@ -14,13 +14,13 @@ $lockFile = "$video_root\$($fileNameNoEx).lock"
 $logFile = "$video_root\$($fileNameNoEx)_log.txt"
 
 # Checks for existence of lock file, returns boolean
-Function testLock() {
-    return test-path -LiteralPath $lockFile
+Function isLocked() {
+    return Test-Path -LiteralPath $lockFile
 }
 
 # Creates lock file if it dosen't exist, deletes it if it does
 Function toggleLock() {
-    if ( testLock $lockFile ) {
+    if ( isLocked ) {
         Remove-Item -LiteralPath $lockFile -Force -ErrorAction Stop
     } else {
         new-item $lockFile
@@ -54,7 +54,7 @@ $thisPreset = getPreset
 # If specifed preset exists in specified preset file json
 if ( $thisPreset ) {
     # Lock file ensures one instance only
-    if ( !(testLock) ) {
+    if ( !(isLocked) ) {
         # Create lock file
         toggleLock
         # Recursively gathers files of the types specified in -file_types in the -video_root directory to transcode, excludes files in .grab directories.
