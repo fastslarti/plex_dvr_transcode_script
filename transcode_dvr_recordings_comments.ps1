@@ -79,7 +79,7 @@ if ( $thisPreset ) {
                 $logOldFileName = $oldFileName.split("\\")[-1]
                 $logNewFileName = $newFileName.split("\\")[-1]
                 # Verify destination file doesn't already exist
-                if ( !(test-path -LiteralPath $newFileName) ) {
+                if ( !(Test-Path -LiteralPath $newFileName) ) {
                     # Calculate size of original file
                     $oldFileSize = [math]::Round($file.Length / 1MB)
                     # Log transcode start

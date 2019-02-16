@@ -62,7 +62,7 @@ if ( $thisPreset ) {
                 $newFileName = "$($oldFileName.Remove($oldFileName.LastIndexOf('.'))).$($thisPreset.FileFormat)"
                 $logOldFileName = $oldFileName.split("\\")[-1]
                 $logNewFileName = $newFileName.split("\\")[-1]
-                if ( !(test-path -LiteralPath $newFileName) ) {
+                if ( !(Test-Path -LiteralPath $newFileName) ) {
                     $oldFileSize = [math]::Round($file.Length / 1MB)
                     logger "TRANSCODE START - SOURCE FILE: $logOldFileName - $oldFileSize MB"
                     transcodeFile $oldFileName $newFileName $use_preset
