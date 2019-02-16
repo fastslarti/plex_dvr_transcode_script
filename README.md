@@ -1,7 +1,7 @@
 # Plex DVR Transcode Script
 #### PowerShell Script - Transcode Plex DVR Recordings via  [HandBrake CLI](https://handbrake.fr/)
 
-Plex DVR records streams from my HDHomeRun Connect Duo as `MPEG2` encoded `.ts` files. They're unnecessarily HUGE. This script uses [HandBrake CLI](https://handbrake.fr/) to automatically transcode these files and (optionally) delete the originals to save space & bandwidth. It's intended to be run as a scheduled task.
+Plex DVR records streams from my HDHomeRun Connect Duo as `MPEG2` encoded `.ts` files. They're unnecessarily HUGE. This script uses [HandBrake CLI](https://handbrake.fr/) to automatically transcode these files and (optionally) delete the originals to save space & bandwidth.
 
 ## Usage
 Iterates over all files of the types specified in the **-file_types** param that are in the directory specified in the **-video_root** param & all sub-directories (`.grab` directories, which are used by the Plex DVR for in-progress recordings, are excluded) and uses [HandBrake CLI](https://handbrake.fr/) to transcode them using the preset specifed in the **-use_preset** param.
