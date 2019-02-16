@@ -11,9 +11,9 @@ Will create a temporary `transcode_dvr_recordings.lock` file in the **-video_roo
 Logs activity in the **-video_root** directory in `transcode_dvr_recordings_log.txt`.
 
 ###### Parameters
-- **-delete_source** - Switch. When set source files will be deleted after transcoding.
-- **-file_types** - String. Comma seperated list of file types to transcode. Ex: `-file_types:"*.ts,*.avi,*.mp4"`.
-- **-handbrake_path** - String. Path to HandBrakeCLI.exe. Ex: `-handbrake_path:"C:\Program Files\HandBrake\HandBrakeCLI.exe"`.
-- **-presets_path** - String. Path to HandBrake presets .json file. Ex: `-presets_path:"C:\Users\[USERNAME]\AppData\Roaming\HandBrake\presets.json"`
-- **-use_preset** - String. The Handbrake preset to use. Ex. `-use_preset:"HQ 1080p30 Surround"`
-- **-video_root** - String. Root directory containing video files to transcode. Ex: `-video_root:"C:\Users\[USERNAME]\Videos"`.
+- **-delete_source** - Switch. When set source files will be deleted after transcoding. Defaults to false.
+- **-file_types** - String. Comma seperated list of file types to transcode. Defaults to `*.ts`. Ex: `-file_types:"*.ts,*.avi,*.mp4"`.
+- **-handbrake_path** - String. Required. Path to HandBrakeCLI.exe. Ex: `-handbrake_path:"C:\Program Files\HandBrake\HandBrakeCLI.exe"`.
+- **-presets_path** - String. Required. Path to HandBrake presets .json file. Ex: `-presets_path:"C:\Users\[USERNAME]\AppData\Roaming\HandBrake\presets.json"`
+- **-use_preset** - String. Required. The Handbrake preset to use. Ex. `-use_preset:"HQ 1080p30 Surround"`
+- **-video_root** - String. Required. Root directory containing video files to transcode. Ex: `-video_root:"C:\Users\[USERNAME]\Videos"`.
