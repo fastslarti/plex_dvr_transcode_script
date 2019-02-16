@@ -38,19 +38,19 @@ Function transcodeFile ($source, $destination, $preset) {
     & $handbrake_path -i $source -o $destination  --preset-import-file $presets_path -Z $preset
 }
 
-# Gets transcoder preset from $presets_path json
-Function getPreset() {
-    $presetsObj = Get-Content -Raw -Path $presets_path | ConvertFrom-Json
+# Parses & returns Handbrake preset with PresetName $name in presets json specified in $path
+Function getHandbrakePreset($path, $name) {
+    $presetsObj = Get-Content -Raw -Path $path | ConvertFrom-Json
     foreach ( $line in $presetsObj | Get-Member ) {
         foreach ( $preset in $presetsObj.$($line.Name).ChildrenArray ) {
-            if ( $preset.PresetName -eq $use_preset ) {
+            if ( $preset.PresetName -eq $name ) {
                 return $preset
             }
         }
     }
 }
 
-$thisPreset = getPreset
+$thisPreset = getHandbrakePreset($presets_path, $use_preset)
 # If specifed preset exists in specified preset file json
 if ( $thisPreset ) {
     # Lock file ensures one instance only
