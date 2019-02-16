@@ -17,3 +17,7 @@ Logs activity in the **-video_root** directory in `transcode_dvr_recordings_log.
 - **-presets_path** - String. Required. Path to HandBrake presets .json file. Ex: `-presets_path:"C:\Users\[USERNAME]\AppData\Roaming\HandBrake\presets.json"`
 - **-use_preset** - String. Required. The Handbrake preset to use. Ex. `-use_preset:"HQ 1080p30 Surround"`
 - **-video_root** - String. Required. Root directory containing video files to transcode. Ex: `-video_root:"C:\Users\[USERNAME]\Videos"`.
+
+###### Dependencies
+- [HandBrake CLI](https://handbrake.fr/)
+- A valid HandBrake presets JSON file, included w/standard HandBrake install
