@@ -4,7 +4,7 @@
 Plex DVR records streams from my HDHomeRun Connect Duo as `MPEG2` encoded `.ts` files. They're unnecessarily HUGE. This script uses [HandBrake CLI](https://handbrake.fr/) to automatically transcode these files and (optionally) delete the originals to save space & bandwidth. It's intended to be run as a scheduled task.
 
 ## Usage
-Iterates over all files contained in the directory specified in the **-video_root** param & all sub-directories that are of the types specified in the **-file_types** param and uses [HandBrake CLI](https://handbrake.fr/) to transcode them using the preset specifed in the **-use_preset** param.
+Iterates over all files of the types specified in the **-file_types** param contained in the directory specified in the **-video_root** param & all sub-directories and uses [HandBrake CLI](https://handbrake.fr/) to transcode them using the preset specifed in the **-use_preset** param.
 
 Will create a temporary `transcode_dvr_recordings.lock` file in the **-video_root** directory to prevent multiple instances of this script from running on the same content.
 
