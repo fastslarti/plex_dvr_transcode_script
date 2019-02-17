@@ -38,19 +38,19 @@ Function transcodeFile ($source, $destination, $preset) {
     & $handbrake_path -i $source -o $destination  --preset-import-file $presets_path -Z $preset
 }
 
-# Parses & returns Handbrake preset with PresetName $name in presets json specified in $path
-Function getHandbrakePreset($path, $name) {
-    $presetsObj = Get-Content -Raw -Path $path | ConvertFrom-Json
+# Gets transcoder preset from $presets_path json
+Function getPreset() {
+    $presetsObj = Get-Content -Raw -Path $presets_path | ConvertFrom-Json
     foreach ( $line in $presetsObj | Get-Member ) {
         foreach ( $preset in $presetsObj.$($line.Name).ChildrenArray ) {
-            if ( $preset.PresetName -eq $name ) {
+            if ( $preset.PresetName -eq $use_preset ) {
                 return $preset
             }
         }
     }
 }
 
-$thisPreset = getHandbrakePreset($presets_path, $use_preset)
+$thisPreset = getPreset
 # If specifed preset exists in specified preset file json
 if ( $thisPreset ) {
     # Lock file ensures one instance only
@@ -79,7 +79,7 @@ if ( $thisPreset ) {
                 $logOldFileName = $oldFileName.split("\\")[-1]
                 $logNewFileName = $newFileName.split("\\")[-1]
                 # Verify destination file doesn't already exist
-                if ( !(Test-Path -LiteralPath $newFileName) ) {
+                if ( !(test-path -LiteralPath $newFileName) ) {
                     # Calculate size of original file
                     $oldFileSize = [math]::Round($file.Length / 1MB)
                     # Log transcode start

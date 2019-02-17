@@ -32,18 +32,18 @@ Function transcodeFile ($source, $destination, $preset) {
     & $handbrake_path -i $source -o $destination  --preset-import-file $presets_path -Z $preset
 }
 
-Function getHandbrakePreset($path, $name) {
-    $presetsObj = Get-Content -Raw -Path $path | ConvertFrom-Json
+Function getPreset() {
+    $presetsObj = Get-Content -Raw -Path $presets_path | ConvertFrom-Json
     foreach ( $line in $presetsObj | Get-Member ) {
         foreach ( $preset in $presetsObj.$($line.Name).ChildrenArray ) {
-            if ( $preset.PresetName -eq $name ) {
+            if ( $preset.PresetName -eq $use_preset ) {
                 return $preset
             }
         }
     }
 }
 
-$thisPreset = getHandbrakePreset($presets_path, $use_preset)
+$thisPreset = getPreset
 if ( $thisPreset ) {
     if ( !(isLocked) ) {
         toggleLock
@@ -62,7 +62,7 @@ if ( $thisPreset ) {
                 $newFileName = "$($oldFileName.Remove($oldFileName.LastIndexOf('.'))).$($thisPreset.FileFormat)"
                 $logOldFileName = $oldFileName.split("\\")[-1]
                 $logNewFileName = $newFileName.split("\\")[-1]
-                if ( !(Test-Path -LiteralPath $newFileName) ) {
+                if ( !(test-path -LiteralPath $newFileName) ) {
                     $oldFileSize = [math]::Round($file.Length / 1MB)
                     logger "TRANSCODE START - SOURCE FILE: $logOldFileName - $oldFileSize MB"
                     transcodeFile $oldFileName $newFileName $use_preset
