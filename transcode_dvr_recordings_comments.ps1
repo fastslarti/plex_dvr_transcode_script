@@ -52,9 +52,13 @@ Function getPreset() {
 
 $thisPreset = getPreset
 # If specifed preset exists in specified preset file json
-if ( $thisPreset ) {
+if ( !($thisPreset) ) {
+    logger "SCRIPT START - SCRIPT END - PRESET $use_preset NOT DEFINED IN $presets_path"
+} else {
     # Lock file ensures one instance only
-    if ( !(isLocked) ) {
+    if ( isLocked ) {
+        logger "SCRIPT START - SCRIPT END - LOCK FILE EXISTS"
+    } else {
         # Create lock file
         toggleLock
         # Recursively gathers files of the types specified in -file_types in the -video_root directory to transcode, excludes files in .grab directories.
@@ -65,7 +69,9 @@ if ( $thisPreset ) {
         if ( !($filesToTranscode -is [array]) ) {
             $filesToTranscode = @($filesToTranscode)
         }
-        if ( $filesToTranscode.length -gt 0 ) {
+        if ( $filesToTranscode.length -lt 1 ) {
+            logger "SCRIPT START - SCRIPT END - NO FILES FOUND"
+        } else {
             # Log Script Start
             logger "SCRIPT START - TRANSCODER PRESET: $use_preset - $($filesToTranscode.length) FILES QUEUED"
             $fileCntr = 0
@@ -110,14 +116,8 @@ if ( $thisPreset ) {
                 $finalLogStr += " - SOURCE FILES DELETED: $totalMbSaved MB Saved"
             }
             logger $finalLogStr
-        } else {
-            logger "SCRIPT START - SCRIPT END - NO FILES FOUND"
         }
         # Delete lock file
         toggleLock
-    } else {
-        logger "SCRIPT START - SCRIPT END - LOCK FILE EXISTS"
     }
-} else {
-    logger "SCRIPT START - SCRIPT END - PRESET $use_preset NOT DEFINED IN $presets_path"
 }
