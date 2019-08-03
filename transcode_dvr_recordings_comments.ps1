@@ -12,6 +12,12 @@ param (
 $fileNameNoEx = "$($MyInvocation.MyCommand)".Remove("$($MyInvocation.MyCommand)".LastIndexOf('.'))
 $lockFile = "$video_root\$($fileNameNoEx).lock"
 $logFile = "$video_root\$($fileNameNoEx)_log.txt"
+$moveToPath = "$video_root\transcoded_originals"
+
+# Function & aliases for checking if file/directory exists
+function not-exist { -not (Test-Path $args) }
+Set-Alias !exist not-exist -Option "Constant, AllScope"
+Set-Alias exist Test-Path -Option "Constant, AllScope"
 
 # Checks for existence of lock file, returns boolean
 Function isLocked() {
@@ -23,7 +29,7 @@ Function toggleLock() {
     if ( isLocked ) {
         Remove-Item -LiteralPath $lockFile -Force -ErrorAction Stop
     } else {
-        new-item $lockFile
+        New-Item $lockFile
     }
 }
 
@@ -50,6 +56,14 @@ Function getPreset() {
     }
 }
 
+# If $delete_source=false ensure original storage directory exists
+if ( !$delete_source ) {
+    if ( !exist $moveToPath ) {
+        New-Item -ItemType Directory -Force -Path $moveToPath
+    }
+}
+
+
 $thisPreset = getPreset
 # If specifed preset exists in specified preset file json
 if ( !($thisPreset) ) {
@@ -64,7 +78,7 @@ if ( !($thisPreset) ) {
         # Recursively gathers files of the types specified in -file_types in the -video_root directory to transcode, excludes files in .grab directories.
         # Get-ChildItem returns a System.IO.FileInfo object if only one file is found, or an array of System.IO.FileInfo objects if multiple files are found
         $filesToTranscode = Get-ChildItem -Path $video_root -Include $file_types.Split(",") -Recurse | ? {
-            $_.FullName -inotmatch "\\.grab\\"
+            $_.FullName -inotmatch ("\\.grab\\") -and $_.FullName -inotmatch ("\\transcoded_originals\\")
         }
         if ( !($filesToTranscode -is [array]) ) {
             $filesToTranscode = @($filesToTranscode)
@@ -85,7 +99,7 @@ if ( !($thisPreset) ) {
                 $logOldFileName = $oldFileName.split("\\")[-1]
                 $logNewFileName = $newFileName.split("\\")[-1]
                 # Verify destination file doesn't already exist
-                if ( !(test-path -LiteralPath $newFileName) ) {
+                if ( !exist $newFileName ) {
                     # Calculate size of original file
                     $oldFileSize = [math]::Round($file.Length / 1MB)
                     # Log transcode start
@@ -98,6 +112,8 @@ if ( !($thisPreset) ) {
                     if ( $delete_source ) {
                         Remove-Item -LiteralPath $oldFileName -Force -ErrorAction Stop
                         $totalMbSaved += ($oldFileSize - $newFileSize)
+                    } elseif ( !exist "$moveToPath\$($logOldFileName)" ) {
+                        Move-Item -path $oldFileName -destination "$moveToPath\$($logOldFileName)"
                     }
                     # Log transcode end
                     logger "TRANSCODE END - DESTINATION FILE: $logNewFileName - $newFileSize MB"

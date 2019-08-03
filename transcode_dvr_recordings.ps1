@@ -10,9 +10,14 @@ param (
 $fileNameNoEx = "$($MyInvocation.MyCommand)".Remove("$($MyInvocation.MyCommand)".LastIndexOf('.'))
 $lockFile = "$video_root\$($fileNameNoEx).lock"
 $logFile = "$video_root\$($fileNameNoEx)_log.txt"
+$moveToPath = "$video_root\transcoded_originals"
+
+function not-exist { -not (Test-Path $args) }
+Set-Alias !exist not-exist -Option "Constant, AllScope"
+Set-Alias exist Test-Path -Option "Constant, AllScope"
 
 Function isLocked() {
-    return Test-Path -LiteralPath $lockFile
+    return exist $lockFile
 }
 
 Function toggleLock() {
@@ -43,6 +48,12 @@ Function getPreset() {
     }
 }
 
+if ( !$delete_source ) {
+    if ( !exist $moveToPath ) {
+        New-Item -ItemType Directory -Force -Path $moveToPath
+    }
+}
+
 $thisPreset = getPreset
 if ( !($thisPreset) ) {
     logger "SCRIPT START - SCRIPT END - PRESET $use_preset NOT DEFINED IN $presets_path"
@@ -52,7 +63,7 @@ if ( !($thisPreset) ) {
     } else {
         toggleLock
         $filesToTranscode = Get-ChildItem -Path $video_root -Include $file_types.Split(",") -Recurse | ? {
-            $_.FullName -inotmatch "\\.grab\\"
+            $_.FullName -inotmatch ("\\.grab\\") -and $_.FullName -inotmatch ("\\transcoded_originals\\")
         }
         if ( !($filesToTranscode -is [array]) ) {
             $filesToTranscode = @($filesToTranscode)
@@ -68,7 +79,7 @@ if ( !($thisPreset) ) {
                 $newFileName = "$($oldFileName.Remove($oldFileName.LastIndexOf('.'))).$($thisPreset.FileFormat)"
                 $logOldFileName = $oldFileName.split("\\")[-1]
                 $logNewFileName = $newFileName.split("\\")[-1]
-                if ( !(test-path -LiteralPath $newFileName) ) {
+                if ( !exist $newFileName ) {
                     $oldFileSize = [math]::Round($file.Length / 1MB)
                     logger "TRANSCODE START - SOURCE FILE: $logOldFileName - $oldFileSize MB"
                     transcodeFile $oldFileName $newFileName $use_preset
@@ -76,6 +87,8 @@ if ( !($thisPreset) ) {
                     if ( $delete_source ) {
                         Remove-Item -LiteralPath $oldFileName -Force -ErrorAction Stop
                         $totalMbSaved += ($oldFileSize - $newFileSize)
+                    } elseif ( !exist "$moveToPath\$($logOldFileName)" ) {
+                        Move-Item -path $oldFileName -destination "$moveToPath\$($logOldFileName)"
                     }
                     logger "TRANSCODE END - DESTINATION FILE: $logNewFileName - $newFileSize MB"
                     $fileCntr++
