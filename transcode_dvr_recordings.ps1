@@ -17,6 +17,11 @@ Set-Alias !exist not-exist -Option "Constant, AllScope"
 Set-Alias exist Test-Path -Option "Constant, AllScope"
 
 Function isLocked() {
+    if ( exist $lockFile ) {
+        if ( ((Get-Date - $lockFile.LastWriteTime).TotalHours) -gt 12 ) {
+            Remove-Item -LiteralPath $lockFile -Force -ErrorAction Stop
+        }
+    }
     return exist $lockFile
 }
 
