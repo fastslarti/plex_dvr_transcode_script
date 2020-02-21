@@ -17,11 +17,6 @@ Set-Alias !exist not-exist -Option "Constant, AllScope"
 Set-Alias exist Test-Path -Option "Constant, AllScope"
 
 Function isLocked() {
-    if ( exist $lockFile ) {
-        if ( ((Get-Date - $lockFile.LastWriteTime).TotalHours) -gt 12 ) {
-            Remove-Item -LiteralPath $lockFile -Force -ErrorAction Stop
-        }
-    }
     return exist $lockFile
 }
 
@@ -68,7 +63,7 @@ if ( !($thisPreset) ) {
     } else {
         toggleLock
         $filesToTranscode = Get-ChildItem -Path $video_root -Include $file_types.Split(",") -Recurse | ? {
-            $_.FullName -inotmatch ("\\.grab\\") -and $_.FullName -inotmatch ("\\transcoded_originals\\")
+            $_.FullName -inotmatch ("\\.grab\\") -and $_.FullName -inotmatch ("\\transcoded_originals\\") -and $_.FullName -inotmatch ("comskipped")
         }
         if ( !($filesToTranscode -is [array]) ) {
             $filesToTranscode = @($filesToTranscode)
